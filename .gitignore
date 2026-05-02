@@ -2,6 +2,7 @@
 .vs*
 *.vcx*
 *.sln
+*.slnx
 x64
 x86
 
