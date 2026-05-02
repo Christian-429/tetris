@@ -24,7 +24,6 @@ private:
 public:
 	Piece();
 	Piece(int _shape);
-	std::vector<sf::Vector2i> getBlocks() const;
 
 	bool moveDown(std::vector<std::vector<int>>& board);
 	bool moveLeft(std::vector<std::vector<int>>& board);
@@ -35,5 +34,8 @@ public:
 	std::vector<sf::Vector2i> swapBlock(int shape);
 	bool rotate(std::vector<std::vector<int>>& board);
 	void hardDrop(std::vector<std::vector<int>>& board);
-	sf::Color getColor();
+
+	sf::Color getColor() const;
+	std::vector<sf::Vector2i> getBlocks() const;
+	int getShape() const;
 };
