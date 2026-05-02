@@ -2,14 +2,15 @@
 
 Engine::Engine() : cell(sf::Vector2f(CELL_SIZE - 1, CELL_SIZE - 1)), board(ROWS, std::vector<int>(COLS)) {
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
-	int screenWidth =  ((COLS * CELL_SIZE)+ SIZEBAR_SIZE) * SCREEN_RESIZE;
+	int screenWidth = ((COLS * CELL_SIZE) + SIZEBAR_SIZE) * SCREEN_RESIZE;
 	int screenHeight = (ROWS * CELL_SIZE) * SCREEN_RESIZE;
 	sf::VideoMode vm(screenWidth, screenHeight);
 	window.create(vm, "game", sf::Style::Default);
 	window.clear(sf::Color::Black);
 	window.display();
 	window.setFramerateLimit(60);
-
+	nextPiece = Piece(rand() % 7);
+	piece.reset(rand() % 7, board);
 	view.reset(sf::FloatRect(0, 0, (COLS * CELL_SIZE) + SIZEBAR_SIZE, ROWS * CELL_SIZE));
 	view.setViewport(sf::FloatRect(0, 0, 1, 1));
 	window.setView(view);
@@ -20,7 +21,14 @@ Engine::Engine() : cell(sf::Vector2f(CELL_SIZE - 1, CELL_SIZE - 1)), board(ROWS,
 	}
 	music.setLoop(true);
 	music.play();
-	music.setVolume(35);
+	music.setVolume(0);
+
+	if (!s1.loadFromFile("sound/pieceDrop.wav") || !s2.loadFromFile("sound/lineClear.wav") || !s3.loadFromFile("sound/gameOver.wav")) {
+		std::cout << "error\n";
+	}
+	drop.setBuffer(s1);
+	lineClear.setBuffer(s2);
+	ending.setBuffer(s3);
 }
 
 void Engine::run() {
@@ -60,32 +68,57 @@ void Engine::handleInput() {
 				break;
 			case sf::Keyboard::X:
 			case sf::Keyboard::Q:
+				drop.play();
 				piece.hardDrop(board);
+				break;
+			case sf::Keyboard::M:
+				music.stop();
 				break;
 			}
 		}
 	}
 }
+
+void Engine::update() {
+	if (moveDelay == 60) {
+		piece.moveDown(board);
+		moveDelay = 0;
+	}
+	moveDelay++;
+
+	if (piece.isOnFloor(board)) {
+		lockPiece();
+		clearLines();
+		gameRunning = piece.reset(nextPiece.getShape(), board);
+		nextPiece = Piece(rand() % 7);
+		if (!gameRunning) {
+			music.stop();
+			ending.play();
+			title.setString("GAME OVER >:(");
+			title.setPosition((COLS * CELL_SIZE) / 2, (ROWS * CELL_SIZE) / 2);
+		}
+	}
+}
+
 void Engine::draw() {
 	window.clear(sf::Color::Black);
 	if (gameRunning) {
 		drawBoard();
 		drawPiece();
-		std::string point = std::to_string(score);
-		scoreBoard.setString(point);
-		window.draw(title);
-		window.draw(scoreBoard);
+		drawSidebar();
 	}
 	else {
 		window.draw(title);
 	}
 	window.display();
 }
+
 void Engine::lockPiece() {
 	for (auto& block : piece.getBlocks()) {
 		board[block.y][block.x] = 1;
 	}
 }
+
 void Engine::clearLines() {
 	for (int row = ROWS - 1; row >= 0; row--) {
 		bool full = true;
@@ -97,56 +130,60 @@ void Engine::clearLines() {
 			board.insert(board.begin(), std::vector<int>(COLS, 0));
 			row++;
 			score += 10;
+			lineClear.play();
 		}
 	}
 }
-void Engine::update() {
-	if (moveDelay == 60) {
-		piece.moveDown(board);
-		moveDelay = 0;
 
-
-	}
-	moveDelay++;
-
-	if (piece.isOnFloor(board)) {
-		lockPiece();
-		clearLines();
-		gameRunning = piece.reset(rand() % 7, board);
-		if (!gameRunning) {
-			title.setString("GAME OVER >:(");
-			title.setPosition((COLS * CELL_SIZE) / 2, (ROWS * CELL_SIZE) / 2);
-		}
-	}
-}
 void Engine::initData() {
 	if (!font.loadFromFile("font/PixelFont.ttf")) { return; }
+
 	title.setFont(font);
 	title.setString("Tetris :D");
 	title.setCharacterSize(30);
 	title.setPosition((COLS * CELL_SIZE) + 10, 0);
+
 	scoreBoard.setFont(font);
-	scoreBoard.setPosition((COLS * CELL_SIZE)+ 120,0);
+	scoreBoard.setCharacterSize(20);
+	scoreBoard.setPosition((COLS * CELL_SIZE) + 120, 0);
 }
+
 void Engine::drawBoard() {
 	for (int rows = 0; rows < ROWS; rows++) {
 		for (int cols = 0; cols < COLS; cols++) {
-			if (board[rows][cols]) {
-				cell.setFillColor(piece.getColor());
-			}
-			else {
-				cell.setFillColor(BACK_GROUND);
-			}
+			cell.setFillColor(board[rows][cols] ? piece.getColor() : BACK_GROUND);
 			cell.setPosition(cols * CELL_SIZE, rows * CELL_SIZE);
 			window.draw(cell);
 		}
 	}
 }
+
 void Engine::drawPiece() {
-	std::vector<sf::Vector2i> pieceBlocks = piece.getBlocks();
-	for (auto& block : pieceBlocks) {
+	for (auto& block : piece.getBlocks()) {
 		cell.setFillColor(piece.getColor());
 		cell.setPosition(block.x * CELL_SIZE, block.y * CELL_SIZE);
 		window.draw(cell);
 	}
+}
+
+void Engine::drawSidebar() {
+	// score
+	scoreBoard.setString(std::to_string(score));
+	window.draw(title);
+	window.draw(scoreBoard);
+
+	// next piece
+	for (auto& block : nextPiece.getBlocks()) {
+		float x = (COLS * CELL_SIZE) + 20 + (block.x - 3) * CELL_SIZE;
+		float y = 100 + block.y * CELL_SIZE;
+		cell.setFillColor(nextPiece.getColor());
+		cell.setPosition(x, y);
+		window.draw(cell);
+	}
+	sf::RectangleShape box(sf::Vector2f(100, 100));
+	box.setOutlineColor(sf::Color::White);
+	box.setOutlineThickness(2);
+	box.setFillColor(sf::Color::Transparent);
+	box.setPosition((COLS * CELL_SIZE) + 10, 60);
+	window.draw(box);
 }

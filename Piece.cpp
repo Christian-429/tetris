@@ -149,7 +149,10 @@ void Piece::hardDrop(std::vector<std::vector<int>>& board) {
         }
     }
 }
-sf::Color Piece::getColor() {
+sf::Color Piece::getColor() const {
     return color;
 }
 
+int Piece::getShape() const {
+    return shape;
+}

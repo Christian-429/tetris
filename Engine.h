@@ -16,8 +16,12 @@ private:
 	sf::Text title;
 	sf::Text scoreBoard;
 	sf::Music music;
-
+	sf::Sound ending;
+	sf::Sound drop;
+	sf::Sound lineClear;
+	sf::SoundBuffer s1, s2, s3;
 	Piece piece;
+	Piece nextPiece;
 	std::vector<std::vector<int>> board;
 	int moveDelay = 0;
 	int score = 0;
@@ -31,4 +35,5 @@ private:
 	void initData();
 	void drawBoard();
 	void drawPiece();
+	void drawSidebar();
 };
