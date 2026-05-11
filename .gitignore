@@ -1,6 +1,7 @@
 #Vs Files
 .vs*
 *.vcx*
+*.slnx
 *.sln
 x64
 x86
