@@ -21,7 +21,7 @@ Engine::Engine() : cell(sf::Vector2f(CELL_SIZE - 1, CELL_SIZE - 1)), board(ROWS,
 	}
 	music.setLoop(true);
 	music.play();
-	music.setVolume(0);
+	music.setVolume(25);
 
 	if (!s1.loadFromFile("sound/pieceDrop.wav") || !s2.loadFromFile("sound/lineClear.wav") || !s3.loadFromFile("sound/gameOver.wav")) {
 		std::cout << "error\n";
@@ -96,6 +96,8 @@ void Engine::update() {
 			ending.play();
 			title.setString("GAME OVER >:(");
 			title.setPosition((COLS * CELL_SIZE) / 2, (ROWS * CELL_SIZE) / 2);
+			scoreBoard.setString("Final Score: " + std::to_string(score));
+			scoreBoard.setPosition((COLS * CELL_SIZE) / 2, ((ROWS * CELL_SIZE) / 2) + 30);
 		}
 	}
 }
@@ -109,6 +111,7 @@ void Engine::draw() {
 	}
 	else {
 		window.draw(title);
+		window.draw(scoreBoard);
 	}
 	window.display();
 }
