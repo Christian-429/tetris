@@ -36,4 +36,5 @@ private:
 	void drawBoard();
 	void drawPiece();
 	void drawSidebar();
+	sf::Color colorBlock(int rows, int cols);
 };

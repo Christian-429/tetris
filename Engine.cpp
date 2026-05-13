@@ -9,7 +9,7 @@ Engine::Engine() : cell(sf::Vector2f(CELL_SIZE - 1, CELL_SIZE - 1)), board(ROWS,
 	window.clear(sf::Color::Black);
 	window.display();
 	window.setFramerateLimit(60);
-	nextPiece = Piece(rand() % 7);
+	nextPiece = Piece(rand() % (7) + 1);
 	piece.reset(rand() % 7, board);
 	view.reset(sf::FloatRect(0, 0, (COLS * CELL_SIZE) + SIZEBAR_SIZE, ROWS * CELL_SIZE));
 	view.setViewport(sf::FloatRect(0, 0, 1, 1));
@@ -90,7 +90,7 @@ void Engine::update() {
 		lockPiece();
 		clearLines();
 		gameRunning = piece.reset(nextPiece.getShape(), board);
-		nextPiece = Piece(rand() % 7);
+		nextPiece = Piece(rand() % (7) + 1);
 		if (!gameRunning) {
 			music.stop();
 			ending.play();
@@ -118,7 +118,7 @@ void Engine::draw() {
 
 void Engine::lockPiece() {
 	for (auto& block : piece.getBlocks()) {
-		board[block.y][block.x] = 1;
+		board[block.y][block.x] = piece.getShape();
 	}
 }
 
@@ -154,7 +154,8 @@ void Engine::initData() {
 void Engine::drawBoard() {
 	for (int rows = 0; rows < ROWS; rows++) {
 		for (int cols = 0; cols < COLS; cols++) {
-			cell.setFillColor(board[rows][cols] ? piece.getColor() : BACK_GROUND);
+			cell.setFillColor(colorBlock(rows,cols));
+			//cell.setFillColor(board[rows][cols] ? piece.getColor() : BACK_GROUND);
 			cell.setPosition(cols * CELL_SIZE, rows * CELL_SIZE);
 			window.draw(cell);
 		}
@@ -189,4 +190,17 @@ void Engine::drawSidebar() {
 	box.setFillColor(sf::Color::Transparent);
 	box.setPosition((COLS * CELL_SIZE) + 10, 60);
 	window.draw(box);
+}
+sf::Color colorBlock(int rows, int cols) {
+	//cell.setFillColor(board[rows][cols] ? piece.getColor() : BACK_GROUND);
+	if (board[rows][cols] == 1) { return line; }
+	else if (board[rows][cols] == 2) { return square; }
+	else if (board[rows][cols] == 3) { return tPiece; }
+	else if (board[rows][cols] == 4) { return nPiece; }
+	else if (board[rows][cols] == 5) { return zPiece; }
+	else if (board[rows][cols] == 6) { return lPiece; }
+	else if (board[rows][cols] == 7) { return jPiece; }
+	else {
+		return BACK_GROUND;
+	}
 }
