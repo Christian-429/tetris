@@ -4,7 +4,7 @@
 const int ROWS = 20, COLS = 10;
 const int CELL_SIZE = 16;
 const int SIZEBAR_SIZE = 150;
-const int SCREEN_RESIZE = 5;
+const int SCREEN_RESIZE = 4;
 const sf::Color BACK_GROUND(36, 36, 84);
 
 //pieces

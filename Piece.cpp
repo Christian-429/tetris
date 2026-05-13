@@ -80,31 +80,31 @@ bool Piece::reset(int _shape, std::vector<std::vector<int>>& board) {
 std::vector<sf::Vector2i> Piece::swapBlock(int shape) {
     std::vector<sf::Vector2i> blocks;
     switch (shape) {
-    case 0: // I
+    case 1: // I
         blocks = { {4,0}, {3,0}, {5,0}, {6,0} };
         color = line;
         break;
-    case 1: // square
+    case 2: // square
         blocks = { {4,0}, {3,0}, {3,1}, {4,1} };
         color = square;
         break;
-    case 2: // T
+    case 3: // T
         blocks = { {4,1}, {3,1}, {5,1} , {4,0} };
         color = tPiece;
         break;
-    case 3: // N
+    case 4: // N
         blocks = { {4,0}, {5,0}, {4,1}, {3,1} };
         color = nPiece;
         break;
-    case 4: // Z
+    case 5: // Z
         blocks = { {4,0}, {3,0}, {4,1}, {5,1} };
         color = zPiece;
         break;
-    case 5: // L
+    case 6: // L
         blocks = { {5,0}, {4,1}, {4,0}, {6,0} };
         color = lPiece;
         break;
-    case 6: // J
+    case 7: // J
         blocks = { {5,1}, {4,1}, {4,0}, {6,1} };
         color = jPiece;
         break;
@@ -113,7 +113,7 @@ std::vector<sf::Vector2i> Piece::swapBlock(int shape) {
 
 }
 bool Piece::rotate(std::vector<std::vector<int>>& board) {
-    if (shape == 1) { return true; }
+    if (shape == 2) { return true; }
     sf::Vector2i piviot = blocks[0];
     std::vector<sf::Vector2i> rotated;
 
